@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des compteurs</title>
+    <link rel="stylesheet" href="compteurs.css">
+</head>
+<body>
+    <header>
+        <h1>Gestion des compteurs</h1>
+    </header>
+    <main>
+        <section id="compteurs">
+            <form id="compteurs-form">
+                <label for="pdl">Numéro PDL/PCE:</label>
+                <input type="text" id="pdl" name="pdl" required>
+
+                <label for="releve">Relevé actuel:</label>
+                <input type="number" id="releve" name="releve" required>
+
+                <label for="photo">Joindre une photo:</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+
+                <button type="submit">Ajouter relevé</button>
+            </form>
+            <div id="historique-releves">
+                <h3>Historique des relevés</h3>
+                <ul id="releves-list"></ul>
+            </div>
+        </section>
+    </main>
+    <a href="index.html" class="btn-back">Retour à l'accueil</a>
+
+    <footer>
+        <p>&copy; 2024 Application de gestion</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            databaseURL: "https://devest2024-2f38c-default-rtdb.firebaseio.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.appspot.com",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Form submission handling
+        const form = document.getElementById('compteurs-form');
+        const relevesList = document.getElementById('releves-list');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const pdl = document.getElementById('pdl').value.trim();
+            const releve = document.getElementById('releve').value.trim();
+
+            if (!pdl || !releve) {
+                alert('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            // Prepare data to save
+            const releveData = {
+                pdl,
+                releve: parseFloat(releve),
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const newReleveRef = push(ref(db, 'releves')); // Push data to Firebase
+                await set(newReleveRef, releveData);
+                alert('Relevé ajouté avec succès.');
+                form.reset();
+                loadReleves(); // Refresh the list of relevés
+            } catch (error) {
+                console.error('Erreur lors de l\'ajout du relevé:', error);
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
+        });
+
+        // Load relevés from Firebase
+        function loadReleves() {
+            const relevesRef = ref(db, 'releves');
+            onValue(relevesRef, (snapshot) => {
+                relevesList.innerHTML = '';
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach((key) => {
+                        const item = data[key];
+                        const li = document.createElement('li');
+                        li.textContent = `PDL: ${item.pdl}, Relevé: ${item.releve}, Date: ${item.timestamp}`;
+                        relevesList.appendChild(li);
+                    });
+                } else {
+                    relevesList.innerHTML = '<li>Aucun relevé trouvé.</li>';
+                }
+            });
+        }
+
+        // Load relevés on page load
+        loadReleves();
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de profil</title>
+    <link rel="stylesheet" href="abonne.css">
+</head>
+<body>
+    <header>
+        <h1>Gestion des profils</h1>
+    </header>
+    <section class="intro">
+        <h2>Bienvenue dans l'application de gestion des abonnés</h2>
+        <p>Cette application est conçue pour faciliter la saisie et la gestion des informations des abonnés, incluant des détails personnels, des informations sur le logement et des informations bancaires.</p>
+    </section>
+    <main>
+        <section id="abonne">
+            <form id="abonne-form">
+                <h3>Informations personnelles</h3>
+                <label for="name">Nom et prénom:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="address">Adresse:</label>
+                <input type="text" id="address" name="address" required>
+                <label for="phone">Téléphone:</label>
+                <input type="tel" id="phone" name="phone" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <h3>Informations sur le logement</h3>
+                <label for="logement-type">Type de logement:</label>
+                <select id="logement-type" name="logement-type">
+                    <option value="appartement">Appartement</option>
+                    <option value="maison">Maison</option>
+                </select>
+                <label for="superficie">Superficie (m2):</label>
+                <input type="number" id="superficie" name="superficie" required>
+                <h3>Informations bancaires</h3>
+                <label for="rib">RIB:</label>
+                <input type="text" id="rib" name="rib" required>
+                <label for="start-date">Date de début:</label>
+                <input type="date" id="start-date" name="start-date" required>
+                <button type="submit">Enregistrer</button>
+            </form>
+        </section>
+
+        <section id="abonnes-list">
+            <h3>Liste des abonnés</h3>
+            <div id="abonnes-container">
+                <!-- Fetched data will be displayed here -->
+            </div>
+        </section>
+    </main>
+    <a href="index.html" class="btn-back">Retour à l'accueil</a>
+
+    <footer>
+        <p>&copy; 2024 Application de gestion</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+// Your Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+    authDomain: "devest2024-2f38c.firebaseapp.com",
+    databaseURL: "https://devest2024-2f38c-default-rtdb.firebaseio.com", // Add this line
+    projectId: "devest2024-2f38c",
+    storageBucket: "devest2024-2f38c.appspot.com",
+    messagingSenderId: "107275103557",
+    appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+};
+  
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Save data to Firebase
+        document.getElementById("abonne-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    console.log("Form submitted!");
+
+    const name = document.getElementById("name").value;
+    const address = document.getElementById("address").value;
+    const phone = document.getElementById("phone").value;
+    const email = document.getElementById("email").value;
+    const logementType = document.getElementById("logement-type").value;
+    const superficie = document.getElementById("superficie").value;
+    const rib = document.getElementById("rib").value;
+    const startDate = document.getElementById("start-date").value;
+
+    console.log({ name, address, phone, email, logementType, superficie, rib, startDate });
+
+    const uniqueKey = `abonne_${Date.now()}`;
+
+    set(ref(db, `abonnes/${uniqueKey}`), {
+        name: name,
+        address: address,
+        phone: phone,
+        email: email,
+        logementType: logementType,
+        superficie: parseInt(superficie),
+        rib: rib,
+        startDate: startDate
+    })
+    .then(() => {
+        alert("Données enregistrées avec succès !");
+        fetchAbonnes();
+    })
+    .catch((error) => {
+        console.error("Erreur lors de l'enregistrement :", error);
+        alert("Une erreur est survenue. Veuillez réessayer.");
+    });
+
+    document.getElementById("abonne-form").reset();
+});
+           
+
+        // Fetch data from Firebase
+        function fetchAbonnes() {
+            const dbRef = ref(db);
+            get(child(dbRef, `abonnes/`))
+                .then((snapshot) => {
+                    const container = document.getElementById("abonnes-container");
+                    container.innerHTML = ""; // Clear previous content
+
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.keys(data).forEach((key) => {
+                            const abonne = data[key];
+                            const abonneDiv = document.createElement("div");
+                            abonneDiv.classList.add("abonne-item");
+                            abonneDiv.innerHTML = `
+                                <p><strong>Nom:</strong> ${abonne.name}</p>
+                                <p><strong>Adresse:</strong> ${abonne.address}</p>
+                                <p><strong>Téléphone:</strong> ${abonne.phone}</p>
+                                <p><strong>Email:</strong> ${abonne.email}</p>
+                                <p><strong>Type de logement:</strong> ${abonne.logementType}</p>
+                                <p><strong>Superficie:</strong> ${abonne.superficie} m²</p>
+                                <p><strong>RIB:</strong> ${abonne.rib}</p>
+                                <p><strong>Date de début:</strong> ${abonne.startDate}</p>
+                            `;
+                            container.appendChild(abonneDiv);
+                        });
+                    } else {
+                        container.innerHTML = "<p>Aucun abonné trouvé.</p>";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erreur lors de la récupération des données :", error);
+                });
+        }
+
+        // Fetch data on page load
+        fetchAbonnes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan QR Code</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      background-color: #e6f7ff; /* Couleur de fond */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .content {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+      max-width: 800px;
+      margin-top: 20px;
+    }
+    .qr-container {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .details {
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Scan QR Code</h1>
+  <div class="content">
+    <div class="details" id="details"></div>
+    <div class="qr-container" id="qrcode"></div>
+  </div>
+
+  <script>
+    // Fonction pour obtenir les paramètres de l'URL
+    function getParameterByName(name, url = window.location.href) {
+      name = name.replace(/[[\]]/g, '\\$&');
+      const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)', 'i');
+      const results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    // Récupération des paramètres de l'URL
+    const nom = getParameterByName('nom');
+    const prenom = getParameterByName('prenom');
+    const telephone = getParameterByName('telephone');
+    const permis = getParameterByName('permis');
+    const immatriculation = getParameterByName('immatriculation');
+    const couleur = getParameterByName('couleur');
+    const modele = getParameterByName('modele');
+    const photo = getParameterByName('photo'); // URL de l'image
+    const state =string(new)
+    // Affichage des détails
+    const detailsElement = document.getElementById('details');
+    detailsElement.textContent = `
+      Nom: ${nom}
+      Prénom: ${prenom}
+      Téléphone: ${telephone}
+      Numéro de permis: ${permis}
+      Immatriculation: ${immatriculation}
+      Couleur du véhicule: ${couleur}
+      Modèle: ${modele}
+    `;
+
+    // Génération du QR code avec les informations
+    const qrData = `
+      Nom: ${nom}
+      Prénom: ${prenom}
+      Téléphone: ${telephone}
+      Numéro de permis: ${permis}
+      Immatriculation: ${immatriculation}
+      Couleur du véhicule: ${couleur}
+      Modèle: ${modele}
+    `;
+
+    const qrCodeContainer = document.getElementById('qrcode');
+    new QRCode(qrCodeContainer, {
+      text: qrData,
+      width: 256,
+      height: 256
+    });
+  </script>
+</body>
+</html>

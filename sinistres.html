@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assurance de Voiture</title>
+    <link rel="stylesheet" href="sinisters.css">
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            databaseURL: "https://devest2024-2f38c-default-rtdb.firebaseio.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.appspot.com",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Function to handle form submission
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            // Get form data
+            const conducteur = document.getElementById('conducteur').value.trim();
+            const marque = document.getElementById('marque').value.trim();
+            const modele = document.getElementById('modele').value.trim();
+            const immatriculation = document.getElementById('immatriculation').value.trim();
+            const chassis = document.getElementById('chassis').value.trim();
+            const assuranceCompagnie = document.getElementById('assurance-compagnie').value.trim();
+            const police = document.getElementById('police').value.trim();
+            const temoins = document.getElementById('temoins').value.trim();
+
+            // Create a data object
+            const insuranceData = {
+                conducteur,
+                marque,
+                modele,
+                immatriculation,
+                chassis,
+                assuranceCompagnie,
+                police,
+                temoins,
+                timestamp: new Date().toISOString(),
+            };
+
+            try {
+                // Save data to Firebase
+                const dataRef = push(ref(db, 'vehicleInsurance'));
+                await set(dataRef, insuranceData);
+
+                alert('Déclaration enregistrée avec succès dans la base de données Firebase.');
+                document.getElementById('assurance-form').reset();
+            } catch (error) {
+                console.error('Erreur lors de l\'enregistrement dans Firebase:', error);
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
+        }
+
+        // Add event listener to the form
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('assurance-form').addEventListener('submit', handleFormSubmit);
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Assurance de Voiture</h1>
+    </header>
+    <main>
+        <section id="assurance">
+            <form id="assurance-form">
+                <h3>Détails du véhicule et de l'assurance</h3>
+                
+                <label for="conducteur">Nom du conducteur:</label>
+                <input type="text" id="conducteur" name="conducteur" required>
+
+                <label for="marque">Marque du véhicule:</label>
+                <input type="text" id="marque" name="marque" required>
+
+                <label for="modele">Modèle du véhicule:</label>
+                <input type="text" id="modele" name="modele" required>
+
+                <label for="immatriculation">Numéro d'immatriculation:</label>
+                <input type="text" id="immatriculation" name="immatriculation" required>
+
+                <label for="chassis">Numéro de châssis:</label>
+                <input type="text" id="chassis" name="chassis" required>
+
+                <label for="assurance-compagnie">Nom de la compagnie d'assurance:</label>
+                <input type="text" id="assurance-compagnie" name="assurance-compagnie" required>
+
+                <label for="police">Numéro de police d'assurance:</label>
+                <input type="text" id="police" name="police" required>
+
+                <label for="temoins">Déclaration des témoins:</label>
+                <textarea id="temoins" name="temoins"></textarea>
+
+                <button type="submit">Déclarer l'assurance</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Application de gestion</p>
+    </footer>
+</body>
+</html>

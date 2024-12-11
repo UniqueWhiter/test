@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déclaration de Sinistre</title>
+    <link rel="stylesheet" href="raport.css">
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            databaseURL: "https://devest2024-2f38c-default-rtdb.firebaseio.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.appspot.com",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
+
+        // Handle form submission for proforma
+        document.querySelector('form[action="#"]').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const fileInput = document.getElementById('proforma');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Veuillez sélectionner un fichier.");
+                return;
+            }
+
+            // Upload file to Firebase Storage
+            const storageReference = storageRef(storage, 'uploads/proforma/' + file.name);
+            const uploadTask = uploadBytesResumable(storageReference, file);
+
+            uploadTask.on(
+                'state_changed',
+                snapshot => {
+                    console.log(`Progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`);
+                },
+                error => {
+                    console.error("Erreur d'upload:", error);
+                    alert("Erreur lors du téléchargement du fichier.");
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    console.log("File available at:", downloadURL);
+
+                    // Save file details to Firebase Realtime Database
+                    const proformaRef = push(ref(db, 'declarations/proforma'));
+                    await set(proformaRef, {
+                        fileName: file.name,
+                        fileURL: downloadURL,
+                        uploadedAt: new Date().toISOString()
+                    });
+
+                    alert("Facture proforma téléchargée avec succès !");
+                }
+            );
+        });
+
+        // Handle form submission for rapport
+        document.querySelector('form[action="#"]:nth-child(2)').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('rapport');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Veuillez sélectionner un fichier.");
+                return;
+            }
+
+            // Upload file to Firebase Storage
+            const storageReference = storageRef(storage, 'uploads/rapport/' + file.name);
+            const uploadTask = uploadBytesResumable(storageReference, file);
+
+            uploadTask.on(
+                'state_changed',
+                snapshot => {
+                    console.log(`Progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`);
+                },
+                error => {
+                    console.error("Erreur d'upload:", error);
+                    alert("Erreur lors du téléchargement du fichier.");
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    console.log("File available at:", downloadURL);
+
+                    // Save file details to Firebase Realtime Database
+                    const rapportRef = push(ref(db, 'declarations/rapport'));
+                    await set(rapportRef, {
+                        fileName: file.name,
+                        fileURL: downloadURL,
+                        uploadedAt: new Date().toISOString()
+                    });
+
+                    alert("Rapport d'expertise téléchargé avec succès !");
+                }
+            );
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Déclaration de Sinistre</h1>
+
+        <div class="status">
+            <h2>États de la fiche</h2>
+            <ul>
+                <li><strong>Nouveau:</strong> La fiche vient d'être créée</li>
+                <li><strong>Validée:</strong> Le sinistre est validé par l’assurance, les photos ont été prises</li>
+                <li><strong>En attente de proforma</strong></li>
+                <li><strong>En attente d’expertise</strong></li>
+                <li><strong>Payé:</strong> Dès la remise du chèque</li>
+                <li><strong>Terminée:</strong> La prise des photos après réparation a été faite</li>
+            </ul>
+        </div>
+
+        <div class="upload-section">
+            <h2>Étape 2: Télécharger la Facture Proforma</h2>
+            <form action="#" method="post" enctype="multipart/form-data">
+                <label for="proforma">Télécharger la facture proforma:</label>
+                <input type="file" id="proforma" name="proforma" accept=".pdf, .jpg, .jpeg, .png" required>
+                <button type="submit">Télécharger</button>
+            </form>
+        </div>
+
+        <div class="upload-section">
+            <h2>Expertise et Rapport d’Expertise</h2>
+            <form action="#" method="post" enctype="multipart/form-data">
+                <label for="rapport">Télécharger le rapport d'expertise:</label>
+                <input type="file" id="rapport" name="rapport" accept=".pdf, .jpg, .jpeg, .png" required>
+                <button type="submit">Télécharger</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
