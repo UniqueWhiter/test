@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page de Profil</title>
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.firebasestorage.app",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
+
+        // Reference to the user's profile in the database
+        const userId = "user123"; // You can dynamically change this based on the logged-in user
+        const userProfileRef = ref(db, 'users/' + userId);
+
+        // Load user profile data
+        window.onload = function() {
+            get(userProfileRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('profile-pic').src = data.profilePic || 'default-pic.jpg';
+                    document.querySelector('.bio').textContent = data.bio || 'Développeur web, passionné par les nouvelles technologies.';
+                    document.querySelector('input[type="email"]').value = data.email || '';
+                    document.querySelector('input[type="tel"]').value = data.phone || '';
+                    document.querySelector('input[type="text"]').value = data.location || '';
+                } else {
+                    console.log("No user data available");
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+        };
+
+        // Upload profile picture
+        function updateProfilePic() {
+            const fileInput = document.getElementById('profile-pic-upload');
+            const file = fileInput.files[0];
+            if (file) {
+                const storageRefProfilePic = storageRef(storage, 'profile-pics/' + file.name);
+                uploadBytes(storageRefProfilePic, file).then((snapshot) => {
+                    console.log('Uploaded profile picture!');
+                    getDownloadURL(snapshot.ref).then((url) => {
+                        set(userProfileRef, {
+                            profilePic: url,
+                            bio: document.querySelector('.bio').textContent,
+                            email: document.querySelector('input[type="email"]').value,
+                            phone: document.querySelector('input[type="tel"]').value,
+                            location: document.querySelector('input[type="text"]').value
+                        });
+                        document.getElementById('profile-pic').src = url;
+                    });
+                });
+            }
+        }
+
+        // Save user profile data
+        document.querySelector('.profile-footer button').addEventListener('click', function() {
+            set(userProfileRef, {
+                profilePic: document.getElementById('profile-pic').src,
+                bio: document.querySelector('.bio').textContent,
+                email: document.querySelector('input[type="email"]').value,
+                phone: document.querySelector('input[type="tel"]').value,
+                location: document.querySelector('input[type="text"]').value
+            }).then(() => {
+                alert("Profile updated successfully!");
+            }).catch((error) => {
+                console.error("Error updating profile: ", error);
+            });
+        });
+    </script>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">Retour</button>
+
+    <header>
+        <h1 class="animate-header">Profil Utilisateur</h1>
+    </header>
+
+    <main>
+        <section id="profil" class="animate-section">
+            <div class="profile-header">
+                <div class="profile-pic-container">
+                    <img src="default-pic.jpg" alt="Photo de profil" class="profile-pic" id="profile-pic">
+                    <input type="file" id="profile-pic-upload" accept="image/*" onchange="updateProfilePic()">
+                    <label for="profile-pic-upload" class="upload-label">Ajouter une image</label>
+                </div>
+                <h2>Nom de l'utilisateur</h2>
+                <p class="bio">Développeur web, passionné par les nouvelles technologies.</p>
+            </div>
+
+            <div class="profile-details">
+                <h3>Détails du Profil</h3>
+                <ul>
+                    <li><strong>Email:</strong> <input type="email" placeholder="Entrez votre email"></li>
+                    <li><strong>Téléphone:</strong> <input type="tel" placeholder="Entrez votre téléphone"></li>
+                    <li><strong>Lieu:</strong> <input type="text" placeholder="Entrez votre lieu"></li>
+                </ul>
+            </div>
+
+            <div class="fingerprint">
+                <h3>Ajouter votre empreinte digitale</h3>
+                <input type="file" id="fingerprint-upload" accept="image/*">
+                <label for="fingerprint-upload" class="upload-label">Télécharger une empreinte</label>
+            </div>
+
+            <div class="security-policy">
+                <h3><i class="fas fa-shield-alt"></i> Politique de sécurité</h3>
+                <p>
+                    Nous prenons la sécurité de vos informations très au sérieux. Assurez-vous de respecter nos consignes pour garantir un environnement sécurisé.
+                </p>
+                <button>Voir la politique complète</button>
+            </div>
+
+            <div class="password-section">
+                <h3><i class="fas fa-lock"></i> Changer le mot de passe</h3>
+                <input type="password" placeholder="Entrez votre mot de passe actuel">
+                <input type="password" placeholder="Nouveau mot de passe">
+                <input type="password" placeholder="Confirmer le nouveau mot de passe">
+                <button>Mettre à jour le mot de passe</button>
+            </div>
+
+            <div class="profile-footer">
+                <button>Modifier le Profil</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Application de gestion</p>
+    </footer>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

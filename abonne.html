@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de profil</title>
+    <link rel="stylesheet" href="abonne.css">
+    
+</head>
+<body>
+    <button class="back-button" onclick="goBack()"></button>
+
+    <header>
+        <h1>Gestion des profils</h1>
+    </header>
+    <section class="intro">
+        <h2>Bienvenue dans l'application de gestion des abonnés</h2>
+        <p>Cette application est conçue pour faciliter la saisie et la gestion des informations des abonnés, incluant des détails personnels, des informations sur le logement et des informations bancaires.</p>
+    </section>
+    <main>
+        <section id="abonne">
+            <form id="abonne-form">
+                <h3>Informations personnelles</h3>
+                <label for="name">Nom et prénom:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="address">Adresse:</label>
+                <input type="text" id="address" name="address" required>
+
+                <label for="phone">Téléphone:</label>
+                <input type="tel" id="phone" name="phone" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <h3>Informations sur le logement</h3>
+                <label for="logement-type">Type de logement:</label>
+                <select id="logement-type" name="logement-type">
+                    <option value="appartement">Appartement</option>
+                    <option value="maison">Maison</option>
+                </select>
+
+                <label for="superficie">Superficie (m2):</label>
+                <input type="number" id="superficie" name="superficie" required>
+
+                <h3>Informations bancaires</h3>
+                <label for="rib">RIB:</label>
+                <input type="text" id="rib" name="rib" required>
+
+                <label for="start-date">Date de début:</label>
+                <input type="date" id="start-date" name="start-date" required>
+
+                <button type="submit">Enregistrer</button>
+            </form>
+        </section>
+    </main>
+    <a href="index.html" class="btn-back">Retour à l'accueil</a>
+
+    <footer>
+        <p>&copy; 2024 Application de gestion</p>
+    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+            authDomain: "devest2024-2f38c.firebaseapp.com",
+            projectId: "devest2024-2f38c",
+            storageBucket: "devest2024-2f38c.appspot.com",
+            messagingSenderId: "107275103557",
+            appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('abonne-form');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevent form from reloading the page
+
+                // Fetch input values
+                const name = document.getElementById('name').value;
+                const address = document.getElementById('address').value;
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                const logementType = document.getElementById('logement-type').value;
+                const superficie = document.getElementById('superficie').value;
+                const rib = document.getElementById('rib').value;
+                const startDate = document.getElementById('start-date').value;
+
+                // Reference to Firebase Database
+                const dataRef = ref(db, 'abonnes/' + Date.now());
+
+                try {
+                    // Save data to Firebase
+                    await set(dataRef, {
+                        name,
+                        address,
+                        phone,
+                        email,
+                        logementType,
+                        superficie,
+                        rib,
+                        startDate,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    alert('Les informations ont été enregistrées avec succès !');
+                    form.reset(); // Clear the form
+                } catch (error) {
+                    console.error('Erreur lors de l\'enregistrement des données :', error);
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                }
+            });
+        });
+    </script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

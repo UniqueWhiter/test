@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Fiches</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+      authDomain: "devest2024-2f38c.firebaseapp.com",
+      projectId: "devest2024-2f38c",
+      storageBucket: "devest2024-2f38c.appspot.com",
+      messagingSenderId: "107275103557",
+      appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const addFicheButton = document.getElementById('addFiche');
+      const ficheNameInput = document.getElementById('ficheName');
+      const etatSelect = document.getElementById('etat');
+
+      addFicheButton.addEventListener('click', async () => {
+        const ficheName = ficheNameInput.value.trim();
+        const etat = etatSelect.value;
+
+        if (!ficheName) {
+          alert('Veuillez entrer un nom pour la fiche.');
+          return;
+        }
+
+        const newFicheRef = push(ref(db, 'fiches'));
+
+        try {
+          await set(newFicheRef, {
+            nom: ficheName,
+            etat: etat,
+            timestamp: new Date().toISOString()
+          });
+          console.log('Fiche saved successfully:', ficheName);
+          ficheNameInput.value = '';
+          etatSelect.selectedIndex = 0;
+        } catch (error) {
+          console.error('Error saving fiche:', error);
+        }
+      });
+
+      function goBack() {
+        window.history.back();
+      }
+    });
+  </script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h4 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 16px;
+      color: #555;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: block;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: #ffae00;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+    .back-button::before {
+      content: "←";
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-button" onclick="goBack()"></button>
+
+  <div class="container">
+    <h1>Gestion des Fiches</h1>
+    <h4>ADMIN VIEW</h4>
+
+    <label for="ficheName">Nom de la fiche :</label>
+    <input type="text" id="ficheName" placeholder="Entrez le nom de la fiche">
+
+    <label for="etat">Choisissez l'état de la fiche :</label>
+    <select id="etat">
+      <option value="nouveau">Nouveau</option>
+      <option value="validee">Validée</option>
+      <option value="attente-proforma">En attente de proforma</option>
+      <option value="attente-expertise">En attente d’expertise</option>
+      <option value="paye">Payé</option>
+      <option value="terminee">Terminée</option>
+    </select>
+
+    <button id="addFiche">Ajouter la fiche</button>
+  </div>
+</body>
+</html>

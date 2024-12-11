@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Déclaration de Sinistre</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #e6f7ff;
+    }
+    h1 {
+      color: #020d3e;
+    }
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .section-title {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #020d3e;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #F4A315;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #e09412;
+    }
+    .btn-back {
+      margin-top: 2rem;
+      display: inline-block;
+      text-decoration: none;
+      color: #18233D;
+      background: #F4A315;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .btn-back:hover {
+      background: #e09412;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background-color: #ffae00;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+
+    .back-button::before {
+      content: "←"; /* السهم */
+      font-size: 20px;
+    }
+  </style>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAof6bT060pZ1q1Lj57UuFKCxqMnUhc1XA",
+        authDomain: "devest2024-2f38c.firebaseapp.com",
+        projectId: "devest2024-2f38c",
+        storageBucket: "devest2024-2f38c.firebasestorage.app",
+        messagingSenderId: "107275103557",
+        appId: "1:107275103557:web:41b64c073b58ac2e84222c"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Reference to the user's claim in the database
+    const claimId = "claim123"; // You can dynamically set this based on the user or generate a new claim ID
+    const claimRef = ref(db, 'claims/' + claimId);
+
+    // Load previous claim information if available
+    window.onload = function() {
+        get(claimRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('conducteur1_nom').value = data.conducteur1_nom || '';
+                document.getElementById('conducteur1_adresse').value = data.conducteur1_adresse || '';
+                document.getElementById('conducteur1_telephone').value = data.conducteur1_telephone || '';
+                document.getElementById('conducteur1_permis').value = data.conducteur1_permis || '';
+                document.getElementById('vehicule1_marque').value = data.vehicule1_marque || '';
+                document.getElementById('vehicule1_modele').value = data.vehicule1_modele || '';
+                document.getElementById('vehicule1_immat').value = data.vehicule1_immat || '';
+                document.getElementById('vehicule1_chassis').value = data.vehicule1_chassis || '';
+                document.getElementById('assurance1_nom').value = data.assurance1_nom || '';
+                document.getElementById('assurance1_police').value = data.assurance1_police || '';
+                document.getElementById('date_accident').value = data.date_accident || '';
+                document.getElementById('lieu_accident').value = data.lieu_accident || '';
+                document.getElementById('conditions').value = data.conditions || '';
+                document.getElementById('dommages').value = data.dommages || '';
+                document.getElementById('temoignaire_nom').value = data.temoignaire_nom || '';
+                document.getElementById('temoignaire_coordonnees').value = data.temoignaire_coordonnees || '';
+                document.getElementById('temoignaire_declaration').value = data.temoignaire_declaration || '';
+                document.getElementById('observations').value = data.observations || '';
+                document.getElementById('desaccords').value = data.desaccords || '';
+            } else {
+                console.log("No previous claim data found");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    };
+
+    // Save the claim data to Firebase
+    document.querySelector("form").addEventListener("submit", function(e) {
+        e.preventDefault(); // Prevent form from submitting the traditional way
+
+        const claimData = {
+            conducteur1_nom: document.getElementById('conducteur1_nom').value,
+            conducteur1_adresse: document.getElementById('conducteur1_adresse').value,
+            conducteur1_telephone: document.getElementById('conducteur1_telephone').value,
+            conducteur1_permis: document.getElementById('conducteur1_permis').value,
+            vehicule1_marque: document.getElementById('vehicule1_marque').value,
+            vehicule1_modele: document.getElementById('vehicule1_modele').value,
+            vehicule1_immat: document.getElementById('vehicule1_immat').value,
+            vehicule1_chassis: document.getElementById('vehicule1_chassis').value,
+            assurance1_nom: document.getElementById('assurance1_nom').value,
+            assurance1_police: document.getElementById('assurance1_police').value,
+            date_accident: document.getElementById('date_accident').value,
+            lieu_accident: document.getElementById('lieu_accident').value,
+            conditions: document.getElementById('conditions').value,
+            dommages: document.getElementById('dommages').value,
+            temoignaire_nom: document.getElementById('temoignaire_nom').value,
+            temoignaire_coordonnees: document.getElementById('temoignaire_coordonnees').value,
+            temoignaire_declaration: document.getElementById('temoignaire_declaration').value,
+            observations: document.getElementById('observations').value,
+            desaccords: document.getElementById('desaccords').value
+        };
+
+        // Save the claim data to Firebase
+        set(claimRef, claimData).then(() => {
+            alert("Déclaration soumise avec succès!");
+            // You can optionally redirect or reset the form here
+        }).catch((error) => {
+            console.error("Error submitting claim: ", error);
+        });
+    });
+  </script>
+</head>
+<body>
+  <button class="back-button" onclick="goBack()"></button>
+
+  <h1>Déclaration de Sinistre</h1>
+  <form>
+    <!-- Coordonnées des conducteurs -->
+    <div class="section-title">Coordonnées des Conducteurs</div>
+    <label for="conducteur1_nom">Nom et Prénom du Conducteur 1</label>
+    <input type="text" id="conducteur1_nom" name="conducteur1_nom" required>
+    
+    <label for="conducteur1_adresse">Adresse du Conducteur 1</label>
+    <input type="text" id="conducteur1_adresse" name="conducteur1_adresse" required>
+    
+    <label for="conducteur1_telephone">Numéro de Téléphone du Conducteur 1</label>
+    <input type="tel" id="conducteur1_telephone" name="conducteur1_telephone" required>
+    
+    <label for="conducteur1_permis">Numéro de Permis de Conduire et Date de Délivrance</label>
+    <input type="text" id="conducteur1_permis" name="conducteur1_permis" required>
+    
+    <!-- Informations sur les véhicules -->
+    <div class="section-title">Informations sur les Véhicules</div>
+    <label for="vehicule1_marque">Marque du Véhicule 1</label>
+    <input type="text" id="vehicule1_marque" name="vehicule1_marque" required>
+    
+    <label for="vehicule1_modele">Modèle du Véhicule 1</label>
+    <input type="text" id="vehicule1_modele" name="vehicule1_modele" required>
+    
+    <label for="vehicule1_immat">Immatriculation du Véhicule 1</label>
+    <input type="text" id="vehicule1_immat" name="vehicule1_immat" required>
+    
+    <label for="vehicule1_chassis">Numéro de Châssis du Véhicule 1</label>
+    <input type="text" id="vehicule1_chassis" name="vehicule1_chassis" required>
+    
+    <label for="assurance1_nom">Nom de la Compagnie d'Assurance du Véhicule 1</label>
+    <input type="text" id="assurance1_nom" name="assurance1_nom" required>
+    
+    <label for="assurance1_police">Numéro de Police d'Assurance du Véhicule 1</label>
+    <input type="text" id="assurance1_police" name="assurance1_police" required>
+    
+    <!-- Détails de l'accident -->
+    <div class="section-title">Détails de l'Accident</div>
+    <label for="date_accident">Date et Heure de l'Accident</label>
+    <input type="datetime-local" id="date_accident" name="date_accident" required>
+    
+    <label for="lieu_accident">Lieu de l'Accident</label>
+    <input type="text" id="lieu_accident" name="lieu_accident" required>
+    
+    <label for="conditions">Conditions Météorologiques et de Visibilité</label>
+    <textarea id="conditions" name="conditions" rows="3" required></textarea>
+    
+    <label for="dommages">Description des Dommages Matériels</label>
+    <textarea id="dommages" name="dommages" rows="3" required></textarea>
+    
+    <!-- Croquis de l'accident -->
+    <div class="section-title">Croquis de l'Accident</div>
+    <label for="croquis">Télécharger le Croquis (optionnel)</label>
+    <input type="file" id="croquis" name="croquis">
+    
+    <!-- Témoignages -->
+    <div class="section-title">Témoignages</div>
+    <label for="temoignaire_nom">Nom et Prénom du Témoin</label>
+    <input type="text" id="temoignaire_nom" name="temoignaire_nom">
+    
+    <label for="temoignaire_coordonnees">Coordonnées du Témoin</label>
+    <input type="text" id="temoignaire_coordonnees" name="temoignaire_coordonnees">
+    
+    <label for="temoignaire_declaration">Déclaration du Témoin</label>
+    <textarea id="temoignaire_declaration" name="temoignaire_declaration" rows="3"></textarea>
+    
+    <!-- Observations et désaccords -->
+    <div class="section-title">Observations et Désaccords</div>
+    <label for="observations">Observations</label>
+    <textarea id="observations" name="observations" rows="3"></textarea>
+    
+    <label for="desaccords">Désaccords (si applicable)</label>
+    <textarea id="desaccords" name="desaccords" rows="3"></textarea>
+    
+    
+    <!-- Bouton de soumission -->
+    <div class="button-container">
+      <button type="submit">Soumettre la Déclaration</button>
+    </div>
+  </form>
+  <script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+</body>
+</html>
